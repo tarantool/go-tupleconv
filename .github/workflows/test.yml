@@ -1,0 +1,53 @@
+---
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    if: (github.event_name == 'push') ||
+      (github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name != github.repository)
+
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup tarantool
+        uses: tarantool/setup-tarantool@v2
+        with:
+          tarantool-version: 2.x-latest
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.19'
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        continue-on-error: true
+        with:
+            # The first run is for GitHub Actions error format.
+            args: --config=golangci-lint.yml
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+            # The second run is for human-readable error format with a file name
+            # and a line number.
+            args: --out-${NO_FUTURE}format colored-line-number --config=golangci-lint.yml
+
+      - name: Unit tests
+        run: |
+            go test -race ./... -covermode=atomic -coverprofile=coverage.out
+
+      - name: Print coverage and send to coveralls
+        env:
+            COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+            go get golang.org/x/tools/cmd/cover
+            go tool cover -func=coverage.out
+            go get github.com/mattn/goveralls
+            go install github.com/mattn/goveralls
+            goveralls -coverprofile=coverage.out -service=github
