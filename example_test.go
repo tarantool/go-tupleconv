@@ -214,8 +214,8 @@ func ExampleMap_insertMappedTuples() {
 	decoder := tupleconv.MakeMapper(converters).
 		WithDefaultConverter(fac.GetStringConverter())
 
-	dt1 := "2020-08-22T11:27:43.123456789-02:00"
-	dt2 := "1880-01-01T00:00:00Z"
+	dt1 := "2020-08-22T11:27:43.123456789-0200"
+	dt2 := "1880-01-01T00:00:00-0000"
 	uuid := "00000000-0000-0000-0000-000000000001"
 	interval := "1,2,3,4,5,6,7,8,1"
 
@@ -272,7 +272,7 @@ func ExampleMap_insertMappedTuples() {
 	//  true
 	//  12
 	//  143.5
-	//  2020-08-22 13:27:43.123456789 +0000 UTC
+	//  2020-08-22 11:27:43.123456789 -0200 -0200
 	//  <nil>
 	//  str
 	//  <nil>

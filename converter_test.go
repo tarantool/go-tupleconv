@@ -38,32 +38,36 @@ func HelperTestConverter[S any, T any](
 	}
 }
 
+func getDatetimeWithValidate(t *testing.T, tm time.Time) *datetime.Datetime {
+	dt, err := datetime.NewDatetime(tm)
+	require.NoError(t, err)
+	return dt
+}
+
 func TestConverters(t *testing.T) {
 	someUUID, err := uuid.Parse("09b56913-11f0-4fa4-b5d0-901b5efa532a")
 	require.NoError(t, err)
 	nullUUID, err := uuid.Parse("00000000-0000-0000-0000-000000000000")
 	require.NoError(t, err)
 
-	time1, err := time.Parse(time.RFC3339, "2020-08-22T11:27:43.123456789-02:00")
+	parisLoc, err := time.LoadLocation("Europe/Paris")
 	require.NoError(t, err)
-	datetime1, err := datetime.NewDatetime(time1.UTC())
-	require.NoError(t, err)
+	time1 := time.Date(2020, 8, 22, 11, 27, 43,
+		123456789, time.FixedZone("", -2*60*60))
+	time2 := time.Date(2022, 7, 26, 17, 6, 49, 809892000,
+		time.FixedZone("", +3*60*60))
+	time3 := time.Date(2022, 7, 26, 17, 06, 49,
+		809892000, parisLoc)
+	time4 := time.Date(2023, 8, 30, 12, 6, 5, 120000000,
+		time.FixedZone("", 0))
+	time5 := time.Date(2023, 8, 30, 12, 6, 5, 120000000,
+		parisLoc)
 
-	time2, err := time.Parse(time.RFC3339, "1880-01-01T00:00:00Z")
-	require.NoError(t, err)
-	datetime2, err := datetime.NewDatetime(time2.UTC())
-	require.NoError(t, err)
-
-	time3, err := time.Parse("2006-01-02 15:04:05", "2023-08-30 11:11:00")
-	require.NoError(t, err)
-	datetime3, err := datetime.NewDatetime(time3.UTC())
-	require.NoError(t, err)
-
-	time4, err := time.Parse(
-		"2006-01-02T15:04:05.999999-0700", "2022-07-26T17:06:49.809892+0300")
-	require.NoError(t, err)
-	datetime4, err := datetime.NewDatetime(time4.UTC())
-	require.NoError(t, err)
+	datetime1 := getDatetimeWithValidate(t, time1)
+	datetime2 := getDatetimeWithValidate(t, time2)
+	datetime3 := getDatetimeWithValidate(t, time3)
+	datetime4 := getDatetimeWithValidate(t, time4)
+	datetime5 := getDatetimeWithValidate(t, time5)
 
 	thSeparators := "@ '"
 	decSeparators := ".*"
@@ -143,16 +147,18 @@ func TestConverters(t *testing.T) {
 		},
 		tupleconv.MakeStringToDatetimeConverter(): {
 			// Basic.
-			{value: "2020-08-22T11:27:43.123456789-02:00", expected: datetime1},
-			{value: "1880-01-01T00:00:00Z", expected: datetime2},
-			{value: "1880-01-01", expected: datetime2},
-			{value: "2023-08-30 11:11:00", expected: datetime3},
-			{value: "2022-07-26T17:06:49.809892+0300", expected: datetime4},
+			{value: "2020-08-22T11:27:43.123456789-0200", expected: datetime1},
+			{value: "2022-07-26T17:06:49.809892+0300", expected: datetime2},
+			{value: "2022-07-26T17:06:49.809892 Europe/Paris", expected: datetime3},
+			{value: "2023-08-30T12:06:05.120-0000", expected: datetime4},
+			{value: "2023-08-30T12:06:05.120 Europe/Paris", expected: datetime5},
 
 			// Error.
 			{value: "19-19-19", isErr: true},
 			{value: "#$,%13п", isErr: true},
 			{value: "2020-08-22T11:27:43*123456789-02:00", isErr: true},
+			{value: "2023-08-30T12:06:05.120 Tatuin", isErr: true},
+			{value: "2023-08-30 Europe/Moscow", isErr: true},
 		},
 		tupleconv.MakeStringToUUIDConverter(): {
 			// Basic.
