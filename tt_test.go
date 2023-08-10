@@ -1,6 +1,7 @@
 package tupleconv_test
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 	dec "github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
@@ -404,6 +405,10 @@ type MockTypeToTTConvFactory struct{}
 
 func (m MockTypeToTTConvFactory) GetBooleanConverter() tupleconv.Converter[any, any] {
 	return tupleconv.MakeFuncConverter(func(s any) (any, error) {
+		asStr, isStr := s.(string)
+		if isStr && asStr == "fakeboolean" {
+			return nil, fmt.Errorf("error!")
+		}
 		return "boolean", nil
 	})
 }
@@ -582,4 +587,17 @@ func TestMakeTypeToTTConverters_unexpected_type(t *testing.T) {
 	fac := MockTypeToTTConvFactory{}
 	_, err := tupleconv.MakeTypeToTTConverters[any](fac, spaceFmt)
 	assert.Error(t, err)
+}
+
+func TestMakeStringToTTConvFactory_convError(t *testing.T) {
+	spaceFmt := []tupleconv.SpaceField{
+		{Type: tupleconv.TypeBoolean},
+	}
+	fac := tupleconv.MakeStringToTTConvFactory()
+	converters, err := tupleconv.MakeTypeToTTConverters[string](fac, spaceFmt)
+	assert.NoError(t, err)
+	boolConverter := converters[0]
+	_, err = boolConverter.Convert("fakeboolean")
+	assert.Error(t, err)
+	assert.Equal(t, `unexpected value fakeboolean for type "boolean"`, err.Error())
 }
