@@ -178,11 +178,9 @@ func (StringToUUIDConverter) Convert(src string) (any, error) {
 }
 
 // StringToDatetimeConverter is a converter from string to datetime.Datetime.
-// Time layouts used:
-// - RFC3339
-// - 2006-01-02 15:04:05
-// - 2006-01-02
-// - 2006-01-02T15:04:05.999999-0700.
+// Time formats used:
+// - 2006-01-02T15:04:05.999999999-0700
+// - 2006-01-02T15:04:05.999999999 Europe/Moscow.
 type StringToDatetimeConverter struct{}
 
 // MakeStringToDatetimeConverter creates StringToDatetimeConverter.
@@ -191,26 +189,31 @@ func MakeStringToDatetimeConverter() StringToDatetimeConverter {
 }
 
 const (
-	ttTimeLayout   = "2006-01-02T15:04:05.999999-0700"
-	dateTimeLayout = "2006-01-02 15:04:05"
-	dateOnlyLayout = "2006-01-02"
+	dateTimeLayout       = "2006-01-02T15:04:05.999999999"
+	dateTimeOffsetLayout = "2006-01-02T15:04:05.999999999-0700"
 )
 
 // Convert is the implementation of Converter[string, any] for StringToDatetimeConverter.
 func (StringToDatetimeConverter) Convert(src string) (any, error) {
-	for _, layout := range [...]string{
-		time.RFC3339,
-		dateTimeLayout,
-		dateOnlyLayout,
-		ttTimeLayout,
-	} {
-		result, err := time.Parse(layout, src)
+	date, tzName, ok := strings.Cut(src, " ")
+	if !ok {
+		tm, err := time.Parse(dateTimeOffsetLayout, src)
 		if err != nil {
-			continue
+			return nil, err
 		}
-		return datetime.NewDatetime(result.UTC())
+		_, offset := tm.Zone()
+		tm = tm.In(time.FixedZone(datetime.NoTimezone, offset))
+		return datetime.NewDatetime(tm)
 	}
-	return nil, fmt.Errorf("unexpected value: %v", src)
+	loc, err := time.LoadLocation(tzName)
+	if err != nil {
+		return nil, err
+	}
+	tm, err := time.ParseInLocation(dateTimeLayout, date, loc)
+	if err != nil {
+		return nil, err
+	}
+	return datetime.NewDatetime(tm)
 }
 
 // StringToMapConverter is a converter from string to map.
