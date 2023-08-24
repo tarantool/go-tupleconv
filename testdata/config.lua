@@ -26,6 +26,21 @@ box.once('init', function()
     })
 
     box.space.test_space:create_index('primary')
+
+    box.schema.create_space('finances', {
+        format = {
+            { name = 'id', type = 'unsigned' },
+            { name = 'money', type = 'number' },
+            { name = 'date', type = 'datetime' }
+        }
+    })
+
+    box.space.finances:create_index('primary')
+
+    datetime = require('datetime')
+    box.space.finances:insert { 1, 14.15, datetime.new({ year = 2023, month = 8, day = 30, hour = 12, min = 13 }) }
+    box.space.finances:insert { 2, 19.3e4, datetime.new({ year = 2023, month = 8, day = 31, tz = 'Europe/Paris' }) }
+    box.space.finances:insert { 3, -111111, datetime.new({ year = 2023, month = 9, day = 2, min = 1, tzoffset = 240 }) }
 end)
 
 function get_test_space_fmt()

@@ -281,3 +281,54 @@ func ExampleMap_insertMappedTuples() {
 	//  <nil>
 	//]
 }
+
+func makeTtEncoder() func(any) (string, error) {
+	datetimeConverter := tupleconv.MakeDatetimeToStringConverter()
+	return func(src any) (string, error) {
+		switch src := src.(type) {
+		case datetime.Datetime:
+			return datetimeConverter.Convert(&src)
+		default:
+			return fmt.Sprint(src), nil
+		}
+	}
+}
+
+func Example_ttEncoder() {
+	cleanupTarantool, err := upTarantool()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer cleanupTarantool()
+
+	converter := tupleconv.MakeFuncConverter(makeTtEncoder())
+	tupleEncoder := tupleconv.MakeMapper([]tupleconv.Converter[any, string]{}).
+		WithDefaultConverter(converter)
+
+	conn, _ := tarantool.Connect(server, tarantool.Opts{
+		User: "test",
+		Pass: "password",
+	})
+	req := tarantool.NewSelectRequest("finances")
+
+	var tuples [][]any
+	if err := conn.Do(req).GetTyped(&tuples); err != nil {
+		fmt.Printf("can't select tuples: %v\n", err)
+		return
+	}
+
+	for _, tuple := range tuples {
+		encoded, err := tupleEncoder.Map(tuple)
+		if err != nil {
+			fmt.Printf("can't encode tuple: %v\n", err)
+			return
+		}
+		fmt.Println(encoded)
+	}
+
+	// Output:
+	// [1 14.15 2023-08-30T12:13:00+0000]
+	// [2 193000 2023-08-31T00:00:00 Europe/Paris]
+	// [3 -111111 2023-09-02T00:01:00+0400]
+}
