@@ -23,6 +23,7 @@ func (c filterIntConverter) Convert(src string) (int64, error) {
 	return strconv.ParseInt(src, 10, 64)
 }
 
+// ExampleConverter demonstrates the basic usage of the Converter.
 func ExampleConverter() {
 	// Basic converter.
 	strToBoolConv := tupleconv.MakeStringToBoolConverter()
@@ -46,6 +47,7 @@ func ExampleConverter() {
 	// 100 <nil>
 }
 
+// ExampleMapper_basicMapper demonstrates the basic usage of the Mapper.
 func ExampleMapper_basicMapper() {
 	// Mapper example.
 	mapper := tupleconv.MakeMapper[string, any]([]tupleconv.Converter[string, any]{
@@ -71,24 +73,25 @@ func ExampleMapper_basicMapper() {
 	// [01] <nil>
 }
 
+// ExampleMapper_singleMapper demonstrates the usage of the Mapper with
+// only the default converter.
 func ExampleMapper_singleMapper() {
 	// Single mapper example.
 	toStringMapper := tupleconv.MakeMapper([]tupleconv.Converter[any, string]{}).
 		WithDefaultConverter(tupleconv.MakeFuncConverter(
 			func(s any) (string, error) {
-				return fmt.Sprintln(s), nil
+				return fmt.Sprint(s), nil
 			}),
 		)
 	res, err := toStringMapper.Map([]any{1, 2.5, nil})
 	fmt.Println(res, err)
 
 	// Output:
-	// [1
-	//  2.5
-	//  <nil>
-	//] <nil>
+	// [1 2.5 <nil>] <nil>
 }
 
+// ExampleStringToTTConvFactory demonstrates how to create Converter list for
+// Mapper using helper functions and StringToTTConvFactory.
 func ExampleStringToTTConvFactory() {
 	factory := tupleconv.MakeStringToTTConvFactory().
 		WithDecimalSeparators(",.")
@@ -108,6 +111,8 @@ func ExampleStringToTTConvFactory() {
 	// [1 -2.2 some_string] <nil>
 }
 
+// ExampleStringToTTConvFactory_manualConverters demonstrates how to obtain Converter
+// from TTConvFactory for manual Converter list construction.
 func ExampleStringToTTConvFactory_manualConverters() {
 	factory := tupleconv.MakeStringToTTConvFactory().
 		WithDecimalSeparators(",.")
@@ -132,6 +137,9 @@ func ExampleStringToTTConvFactory_manualConverters() {
 	// [1 -2.2 some_string] <nil>
 }
 
+// ExampleStringToTTConvFactory_convertNullable demonstrates an example of converting
+// a nullable type: an attempt to convert to null will be made before attempting to convert to the
+// main type.
 func ExampleStringToTTConvFactory_convertNullable() {
 	factory := tupleconv.MakeStringToTTConvFactory().
 		WithNullValue("2.5")
@@ -155,6 +163,8 @@ func (f *customFactory) MakeTypeToAnyMapper() tupleconv.Converter[string, any] {
 	})
 }
 
+// ExampleTTConvFactory_custom demonstrates how to customize the behavior of TTConvFactory
+// by inheriting from it and overriding the necessary functions.
 func ExampleTTConvFactory_custom() {
 	facture := &customFactory{}
 	spaceFmt := []tupleconv.SpaceField{{Type: tupleconv.TypeAny}}
@@ -192,6 +202,21 @@ func upTarantool() (func(), error) {
 	return cleanup, nil
 }
 
+func makeTtEncoder() func(any) (string, error) {
+	datetimeConverter := tupleconv.MakeDatetimeToStringConverter()
+	return func(src any) (string, error) {
+		switch src := src.(type) {
+		case datetime.Datetime:
+			return datetimeConverter.Convert(&src)
+		default:
+			return fmt.Sprint(src), nil
+		}
+	}
+}
+
+// ExampleMap_insertMappedTuples demonstrates the combination of Mapper and go-tarantool
+// functionality: firstly map string tuples to the tarantool types, then insert them to the
+// target space.
 func ExampleMap_insertMappedTuples() {
 	cleanupTarantool, err := upTarantool()
 	if err != nil {
@@ -205,7 +230,12 @@ func ExampleMap_insertMappedTuples() {
 		Pass: "password",
 	})
 	var spaceFmtResp [][]tupleconv.SpaceField
-	_ = conn.CallTyped("get_test_space_fmt", []any{}, &spaceFmtResp)
+	req := tarantool.NewCallRequest("get_test_space_fmt")
+	if err := conn.Do(req).GetTyped(&spaceFmtResp); err != nil {
+		fmt.Printf("can't get target space fmt: %v\n", err)
+		return
+	}
+
 	spaceFmt := spaceFmtResp[0]
 	fmt.Println(spaceFmt[0:3])
 
@@ -251,14 +281,7 @@ func ExampleMap_insertMappedTuples() {
 
 	tuple0, _ := resp.Data[0].([]any)
 	encoder := tupleconv.MakeMapper[any, string]([]tupleconv.Converter[any, string]{}).
-		WithDefaultConverter(tupleconv.MakeFuncConverter(func(s any) (string, error) {
-			asDatetime, isDatetime := s.(datetime.Datetime)
-			if isDatetime {
-				return fmt.Sprintln(asDatetime.ToTime()), nil
-			} else {
-				return fmt.Sprintln(s), nil
-			}
-		}))
+		WithDefaultConverter(tupleconv.MakeFuncConverter(makeTtEncoder()))
 
 	encodedTuple0, _ := encoder.Map(tuple0)
 	fmt.Println(encodedTuple0)
@@ -268,32 +291,11 @@ func ExampleMap_insertMappedTuples() {
 	// insert response code = 0
 	// insert response code = 0
 	// insert response code = 0
-	// [1
-	//  true
-	//  12
-	//  143.5
-	//  2020-08-22 11:27:43.123456789 -0200 -0200
-	//  <nil>
-	//  str
-	//  <nil>
-	//  [1 2 3]
-	//  190
-	//  <nil>
-	//]
+	// [1 true 12 143.5 2020-08-22T11:27:43.123456789-0200 <nil> str <nil> [1 2 3] 190 <nil>]
 }
 
-func makeTtEncoder() func(any) (string, error) {
-	datetimeConverter := tupleconv.MakeDatetimeToStringConverter()
-	return func(src any) (string, error) {
-		switch src := src.(type) {
-		case datetime.Datetime:
-			return datetimeConverter.Convert(&src)
-		default:
-			return fmt.Sprint(src), nil
-		}
-	}
-}
-
+// Example_ttEncoder demonstrates how to create an encoder, using Mapper with only a default
+// Converter defined.
 func Example_ttEncoder() {
 	cleanupTarantool, err := upTarantool()
 	if err != nil {
