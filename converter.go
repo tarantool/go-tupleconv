@@ -32,6 +32,9 @@ var (
 	_ Converter[string, any] = (*StringToNullConverter)(nil)
 	_ Converter[string, any] = (*IdentityConverter[string])(nil)
 	_ Converter[string, any] = (*StringToIntervalConverter)(nil)
+
+	_ Converter[*datetime.Datetime, string] = (*DatetimeToStringConverter)(nil)
+	_ Converter[datetime.Interval, string]  = (*IntervalToStringConverter)(nil)
 )
 
 // IdentityConverter is a converter from S to any, that doesn't change the input.
@@ -328,4 +331,40 @@ func (StringToIntervalConverter) Convert(src string) (any, error) {
 		Adjust: adjust,
 	}
 	return interval, nil
+}
+
+// DatetimeToStringConverter is a converter from datetime.Datetime to string.
+type DatetimeToStringConverter struct{}
+
+// MakeDatetimeToStringConverter creates DatetimeToStringConverter.
+func MakeDatetimeToStringConverter() DatetimeToStringConverter {
+	return DatetimeToStringConverter{}
+}
+
+// Convert is the implementation of Converter[*datetime.Datetime, string]
+// for DatetimeToStringConverter.
+func (DatetimeToStringConverter) Convert(datetime *datetime.Datetime) (string, error) {
+	tm := datetime.ToTime()
+	zone := tm.Location().String()
+	if zone != "" {
+		return fmt.Sprintf("%s %s", tm.Format(dateTimeLayout), zone), nil
+	}
+	return tm.Format(dateTimeOffsetLayout), nil
+}
+
+// IntervalToStringConverter is a converter from datetime.Interval to string.
+type IntervalToStringConverter struct{}
+
+// MakeIntervalToStringConverter creates IntervalToStringConverter.
+func MakeIntervalToStringConverter() IntervalToStringConverter {
+	return IntervalToStringConverter{}
+}
+
+// Convert is the implementation of Converter[datetime.Interval, string]
+// for IntervalToStringConverter.
+func (IntervalToStringConverter) Convert(interval datetime.Interval) (string, error) {
+	ret := fmt.Sprintf("%d,%d,%d,%d,%d,%d,%d,%d,%d",
+		interval.Year, interval.Month, interval.Week, interval.Day, interval.Hour, interval.Min,
+		interval.Sec, interval.Nsec, interval.Adjust)
+	return ret, nil
 }

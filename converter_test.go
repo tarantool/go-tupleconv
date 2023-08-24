@@ -311,6 +311,59 @@ func TestConverters(t *testing.T) {
 	}
 }
 
+func TestMakeDatetimeToStringConverter(t *testing.T) {
+	parisLoc, err := time.LoadLocation("Europe/Paris")
+	require.NoError(t, err)
+	time1 := time.Date(2023, 8, 30, 12, 6, 5, 123456789,
+		time.FixedZone("", 60*60*4))
+	time2 := time.Date(2023, 8, 30, 12, 6, 5, 120000000,
+		parisLoc)
+	time3 := time.Date(2020, 9, 14, 12, 12, 12, 0, time.UTC)
+
+	cases := []convCase[*datetime.Datetime, string]{
+		{
+			value:    getDatetimeWithValidate(t, time1),
+			expected: "2023-08-30T12:06:05.123456789+0400",
+		},
+		{
+			value:    getDatetimeWithValidate(t, time2),
+			expected: "2023-08-30T12:06:05.12 Europe/Paris",
+		},
+		{
+			value:    getDatetimeWithValidate(t, time3),
+			expected: "2020-09-14T12:12:12 UTC",
+		},
+	}
+	converter := tupleconv.MakeDatetimeToStringConverter()
+	HelperTestConverter[*datetime.Datetime, string](t, converter, cases)
+}
+
+func TestMakeIntervalToStringConverter(t *testing.T) {
+	interval := datetime.Interval{
+		Year:   1234,
+		Month:  11,
+		Week:   22,
+		Day:    33,
+		Hour:   44,
+		Min:    55,
+		Sec:    66,
+		Nsec:   77,
+		Adjust: datetime.LastAdjust,
+	}
+
+	sparseInterval := datetime.Interval{
+		Year: 1414,
+		Nsec: 4343904394,
+	}
+
+	cases := []convCase[datetime.Interval, string]{
+		{value: interval, expected: "1234,11,22,33,44,55,66,77,2"},
+		{value: sparseInterval, expected: "1414,0,0,0,0,0,0,4343904394,0"},
+	}
+	converter := tupleconv.MakeIntervalToStringConverter()
+	HelperTestConverter[datetime.Interval, string](t, converter, cases)
+}
+
 func TestMakeSequenceConverter(t *testing.T) {
 	parser := tupleconv.MakeSequenceConverter([]tupleconv.Converter[string, any]{
 		tupleconv.MakeStringToUIntConverter(""),
