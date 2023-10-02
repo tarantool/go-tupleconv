@@ -3,15 +3,15 @@ package tupleconv_test
 import (
 	"errors"
 	"fmt"
-	"github.com/tarantool/go-tarantool"
-	"github.com/tarantool/go-tarantool/datetime"
-	"github.com/tarantool/go-tarantool/test_helpers"
+	"github.com/tarantool/go-tarantool/v2"
+	"github.com/tarantool/go-tarantool/v2/datetime"
+	"github.com/tarantool/go-tarantool/v2/test_helpers"
 	"github.com/tarantool/go-tupleconv"
 	"strconv"
 	"strings"
 	"time"
 
-	_ "github.com/tarantool/go-tarantool/uuid"
+	_ "github.com/tarantool/go-tarantool/v2/uuid"
 )
 
 type filterIntConverter struct {
@@ -207,7 +207,7 @@ func makeTtEncoder() func(any) (string, error) {
 	return func(src any) (string, error) {
 		switch src := src.(type) {
 		case datetime.Datetime:
-			return datetimeConverter.Convert(&src)
+			return datetimeConverter.Convert(src)
 		default:
 			return fmt.Sprint(src), nil
 		}

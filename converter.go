@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/tarantool/go-tarantool/datetime"
-	"github.com/tarantool/go-tarantool/decimal"
+	"github.com/tarantool/go-tarantool/v2/datetime"
+	"github.com/tarantool/go-tarantool/v2/decimal"
 )
 
 // Converter is a converter from S to T.
@@ -33,8 +33,8 @@ var (
 	_ Converter[string, any] = (*IdentityConverter[string])(nil)
 	_ Converter[string, any] = (*StringToIntervalConverter)(nil)
 
-	_ Converter[*datetime.Datetime, string] = (*DatetimeToStringConverter)(nil)
-	_ Converter[datetime.Interval, string]  = (*IntervalToStringConverter)(nil)
+	_ Converter[datetime.Datetime, string] = (*DatetimeToStringConverter)(nil)
+	_ Converter[datetime.Interval, string] = (*IntervalToStringConverter)(nil)
 )
 
 // IdentityConverter is a converter from S to any, that doesn't change the input.
@@ -164,7 +164,7 @@ func MakeStringToDecimalConverter(ignoreChars, decSeparators string) StringToDec
 func (conv StringToDecimalConverter) Convert(src string) (any, error) {
 	src = replaceCharacters(src, conv.ignoreChars, "")
 	src = replaceCharacters(src, conv.decSeparators, ".")
-	return decimal.NewDecimalFromString(src)
+	return decimal.MakeDecimalFromString(src)
 }
 
 // StringToUUIDConverter is a converter from string to UUID.
@@ -206,7 +206,7 @@ func (StringToDatetimeConverter) Convert(src string) (any, error) {
 		}
 		_, offset := tm.Zone()
 		tm = tm.In(time.FixedZone(datetime.NoTimezone, offset))
-		return datetime.NewDatetime(tm)
+		return datetime.MakeDatetime(tm)
 	}
 	loc, err := time.LoadLocation(tzName)
 	if err != nil {
@@ -216,7 +216,7 @@ func (StringToDatetimeConverter) Convert(src string) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return datetime.NewDatetime(tm)
+	return datetime.MakeDatetime(tm)
 }
 
 // StringToMapConverter is a converter from string to map.
@@ -343,7 +343,7 @@ func MakeDatetimeToStringConverter() DatetimeToStringConverter {
 
 // Convert is the implementation of Converter[*datetime.Datetime, string]
 // for DatetimeToStringConverter.
-func (DatetimeToStringConverter) Convert(datetime *datetime.Datetime) (string, error) {
+func (DatetimeToStringConverter) Convert(datetime datetime.Datetime) (string, error) {
 	tm := datetime.ToTime()
 	zone := tm.Location().String()
 	if zone != "" {
