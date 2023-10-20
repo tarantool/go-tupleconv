@@ -27,10 +27,14 @@ github.com/tarantool/go-openssl v0.0.8-0.20230307065445-720eeb389195 h1:/AN3eUPs
 github.com/tarantool/go-openssl v0.0.8-0.20230307065445-720eeb389195/go.mod h1:M7H4xYSbzqpW/ZRBMyH0eyqQBsnhAMfsYk5mv0yid7A=
 github.com/tarantool/go-openssl v0.0.8-0.20230801114713-b452431f934a h1:eeElglRXJ3xWKkHmDbeXrQWlZyQ4t3Ca1YlZsrfdXFU=
 github.com/tarantool/go-openssl v0.0.8-0.20230801114713-b452431f934a/go.mod h1:M7H4xYSbzqpW/ZRBMyH0eyqQBsnhAMfsYk5mv0yid7A=
+github.com/tarantool/go-openssl v0.0.8-0.20231004103608-336ca939d2ca h1:oOrBh73tDDyooIXajfr+0pfnM+89404ClAhJpTTHI7E=
+github.com/tarantool/go-openssl v0.0.8-0.20231004103608-336ca939d2ca/go.mod h1:M7H4xYSbzqpW/ZRBMyH0eyqQBsnhAMfsYk5mv0yid7A=
 github.com/tarantool/go-tarantool v1.11.0 h1:iLw8kYDQNFA3c3VHhBJJajXKUJPaz0StY/CdrutDn6s=
 github.com/tarantool/go-tarantool v1.11.0/go.mod h1:QRiXv0jnxwgxHtr9ZmifSr/eRba76gTUBgp69pDMX1U=
 github.com/tarantool/go-tarantool/v2 v2.0.0-20230823074441-d8df65dcd0f2 h1:twlq30ASdD2pykY6GUht00Po//UaZ9f1UCHWWnlJlaQ=
 github.com/tarantool/go-tarantool/v2 v2.0.0-20230823074441-d8df65dcd0f2/go.mod h1:wxReV/1H1dOTV47NebCEEbjTiqzRdGnQwEomU9YcwDo=
+github.com/tarantool/go-tarantool/v2 v2.0.0-20231018152154-bd6aab9db092 h1:6Ato6Vj0C/EriK8iBx7Cda4GcQIMzG92DTE6H7VuaQM=
+github.com/tarantool/go-tarantool/v2 v2.0.0-20231018152154-bd6aab9db092/go.mod h1:jMQyQFvaB/FwND0d783F1Npo4xj84rnUokafNcp3nig=
 github.com/vmihailenco/msgpack/v5 v5.3.5 h1:5gO0H1iULLWGhs2H5tbAHIZTV8/cYafcFOr9znI5mJU=
 github.com/vmihailenco/msgpack/v5 v5.3.5/go.mod h1:7xyJ9e+0+9SaZT0Wt1RGleJXzli6Q/V5KbhBonMG9jc=
 github.com/vmihailenco/tagparser/v2 v2.0.0 h1:y09buUbR+b5aycVFQs/g70pqKVZNBmxwAhO7/IwNM9g=

@@ -6,7 +6,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/shopspring/decimal v1.3.1
 	github.com/stretchr/testify v1.7.1
-	github.com/tarantool/go-tarantool/v2 v2.0.0-20230823074441-d8df65dcd0f2
+	github.com/tarantool/go-tarantool/v2 v2.0.0-20231018152154-bd6aab9db092
 )
 
 require (
@@ -16,7 +16,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spacemonkeygo/spacelog v0.0.0-20180420211403-2296661a0572 // indirect
 	github.com/tarantool/go-iproto v0.1.0 // indirect
-	github.com/tarantool/go-openssl v0.0.8-0.20230801114713-b452431f934a // indirect
+	github.com/tarantool/go-openssl v0.0.8-0.20231004103608-336ca939d2ca // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	golang.org/x/net v0.0.0-20201021035429-f5854403a974 // indirect

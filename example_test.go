@@ -1,6 +1,7 @@
 package tupleconv_test
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/tarantool/go-tarantool/v2"
@@ -225,7 +226,7 @@ func ExampleMap_insertMappedTuples() {
 	}
 	defer cleanupTarantool()
 
-	conn, _ := tarantool.Connect(server, tarantool.Opts{
+	conn, _ := tarantool.Connect(context.Background(), server, tarantool.Opts{
 		User: "test",
 		Pass: "password",
 	})
@@ -308,7 +309,7 @@ func Example_ttEncoder() {
 	tupleEncoder := tupleconv.MakeMapper([]tupleconv.Converter[any, string]{}).
 		WithDefaultConverter(converter)
 
-	conn, _ := tarantool.Connect(server, tarantool.Opts{
+	conn, _ := tarantool.Connect(context.Background(), server, tarantool.Opts{
 		User: "test",
 		Pass: "password",
 	})
