@@ -1,17 +1,19 @@
 package tupleconv_test
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"github.com/tarantool/go-tarantool"
-	"github.com/tarantool/go-tarantool/datetime"
-	"github.com/tarantool/go-tarantool/test_helpers"
-	"github.com/tarantool/go-tupleconv"
 	"strconv"
 	"strings"
 	"time"
 
-	_ "github.com/tarantool/go-tarantool/uuid"
+	"github.com/tarantool/go-tarantool/v2"
+	"github.com/tarantool/go-tarantool/v2/datetime"
+	"github.com/tarantool/go-tarantool/v2/test_helpers"
+	"github.com/tarantool/go-tupleconv"
+
+	_ "github.com/tarantool/go-tarantool/v2/uuid"
 )
 
 type filterIntConverter struct {
@@ -180,13 +182,21 @@ func ExampleTTConvFactory_custom() {
 const workDir = "work_dir"
 const server = "127.0.0.1:3014"
 
+var dialer = tarantool.NetDialer{
+	Address:  server,
+	User:     "test",
+	Password: "password",
+}
+var opts = tarantool.Opts{
+	Timeout: 5 * time.Second,
+}
+
 func upTarantool() (func(), error) {
 	inst, err := test_helpers.StartTarantool(test_helpers.StartOpts{
+		Dialer:       dialer,
 		InitScript:   "testdata/config.lua",
 		Listen:       server,
 		WorkDir:      workDir,
-		User:         "test",
-		Pass:         "password",
 		WaitStart:    100 * time.Millisecond,
 		ConnectRetry: 3,
 		RetryTimeout: 500 * time.Millisecond,
@@ -207,7 +217,7 @@ func makeTtEncoder() func(any) (string, error) {
 	return func(src any) (string, error) {
 		switch src := src.(type) {
 		case datetime.Datetime:
-			return datetimeConverter.Convert(&src)
+			return datetimeConverter.Convert(src)
 		default:
 			return fmt.Sprint(src), nil
 		}
@@ -225,10 +235,9 @@ func ExampleMap_insertMappedTuples() {
 	}
 	defer cleanupTarantool()
 
-	conn, _ := tarantool.Connect(server, tarantool.Opts{
-		User: "test",
-		Pass: "password",
-	})
+	conn, _ := tarantool.Connect(context.Background(), dialer, opts)
+	defer conn.Close()
+
 	var spaceFmtResp [][]tupleconv.SpaceField
 	req := tarantool.NewCallRequest("get_test_space_fmt")
 	if err := conn.Do(req).GetTyped(&spaceFmtResp); err != nil {
@@ -264,12 +273,11 @@ func ExampleMap_insertMappedTuples() {
 			return
 		}
 		insertReq := tarantool.NewInsertRequest("test_space").Tuple(mapped)
-		resp, err := conn.Do(insertReq).Get()
+		_, err = conn.Do(insertReq).Get()
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		fmt.Println("insert response code =", resp.Code)
 	}
 
 	selectReq := tarantool.NewSelectRequest("test_space")
@@ -279,7 +287,7 @@ func ExampleMap_insertMappedTuples() {
 		return
 	}
 
-	tuple0, _ := resp.Data[0].([]any)
+	tuple0, _ := resp[0].([]any)
 	encoder := tupleconv.MakeMapper[any, string]([]tupleconv.Converter[any, string]{}).
 		WithDefaultConverter(tupleconv.MakeFuncConverter(makeTtEncoder()))
 
@@ -288,9 +296,6 @@ func ExampleMap_insertMappedTuples() {
 
 	// Output:
 	// [{0 id unsigned false} {0 boolean boolean false} {0 number number false}]
-	// insert response code = 0
-	// insert response code = 0
-	// insert response code = 0
 	// [1 true 12 143.5 2020-08-22T11:27:43.123456789-0200 <nil> str <nil> [1 2 3] 190 <nil>]
 }
 
@@ -308,10 +313,9 @@ func Example_ttEncoder() {
 	tupleEncoder := tupleconv.MakeMapper([]tupleconv.Converter[any, string]{}).
 		WithDefaultConverter(converter)
 
-	conn, _ := tarantool.Connect(server, tarantool.Opts{
-		User: "test",
-		Pass: "password",
-	})
+	conn, _ := tarantool.Connect(context.Background(), dialer, opts)
+	defer conn.Close()
+
 	req := tarantool.NewSelectRequest("finances")
 
 	var tuples [][]any

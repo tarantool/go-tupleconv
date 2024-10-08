@@ -2,16 +2,17 @@ package tupleconv_test
 
 import (
 	"fmt"
+	"math/big"
+	"testing"
+	"time"
+
 	"github.com/google/uuid"
 	dec "github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tarantool/go-tarantool/datetime"
-	"github.com/tarantool/go-tarantool/decimal"
+	"github.com/tarantool/go-tarantool/v2/datetime"
+	"github.com/tarantool/go-tarantool/v2/decimal"
 	"github.com/tarantool/go-tupleconv"
-	"math/big"
-	"testing"
-	"time"
 )
 
 func TestStringToTTConvFactory(t *testing.T) {
@@ -328,19 +329,19 @@ func TestStringToTTConvFactory(t *testing.T) {
 		tupleconv.TypeDecimal: {
 			{
 				value: "12`13`144",
-				expected: &decimal.Decimal{
+				expected: decimal.Decimal{
 					Decimal: dec.NewFromBigInt(big.NewInt(1213144), 0),
 				},
 			},
 			{
 				value: "111`22e333",
-				expected: &decimal.Decimal{
+				expected: decimal.Decimal{
 					Decimal: dec.NewFromBigInt(big.NewInt(11122), 333),
 				},
 			},
 			{
 				value: "11,12",
-				expected: &decimal.Decimal{
+				expected: decimal.Decimal{
 					Decimal: dec.NewFromBigInt(big.NewInt(1112), -2),
 				},
 			},
