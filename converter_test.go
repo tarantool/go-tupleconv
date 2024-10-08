@@ -10,8 +10,8 @@ import (
 	dec "github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tarantool/go-tarantool/datetime"
-	"github.com/tarantool/go-tarantool/decimal"
+	"github.com/tarantool/go-tarantool/v2/datetime"
+	"github.com/tarantool/go-tarantool/v2/decimal"
 	"github.com/tarantool/go-tupleconv"
 )
 
@@ -38,8 +38,8 @@ func HelperTestConverter[S any, T any](
 	}
 }
 
-func getDatetimeWithValidate(t *testing.T, tm time.Time) *datetime.Datetime {
-	dt, err := datetime.NewDatetime(tm)
+func getDatetimeWithValidate(t *testing.T, tm time.Time) datetime.Datetime {
+	dt, err := datetime.MakeDatetime(tm)
 	require.NoError(t, err)
 	return dt
 }
@@ -247,35 +247,35 @@ func TestConverters(t *testing.T) {
 		tupleconv.MakeStringToDecimalConverter(thSeparators, decSeparators): {
 			{
 				value:    "0",
-				expected: &decimal.Decimal{Decimal: dec.NewFromBigInt(big.NewInt(0), 0)},
+				expected: decimal.Decimal{Decimal: dec.NewFromBigInt(big.NewInt(0), 0)},
 			},
 			{
 				value:    "1",
-				expected: &decimal.Decimal{Decimal: dec.NewFromBigInt(big.NewInt(1), 0)},
+				expected: decimal.Decimal{Decimal: dec.NewFromBigInt(big.NewInt(1), 0)},
 			},
 			{
 				value:    "-1",
-				expected: &decimal.Decimal{Decimal: dec.NewFromBigInt(big.NewInt(-1), 0)},
+				expected: decimal.Decimal{Decimal: dec.NewFromBigInt(big.NewInt(-1), 0)},
 			},
 			{
 				value: "43904329",
-				expected: &decimal.Decimal{
+				expected: decimal.Decimal{
 					Decimal: dec.NewFromBigInt(big.NewInt(43904329), 0),
 				},
 			},
 			{
 				value: "-9223372036854775808",
-				expected: &decimal.Decimal{
+				expected: decimal.Decimal{
 					Decimal: dec.NewFromBigInt(big.NewInt(int64(-9223372036854775808)), 0),
 				},
 			},
 			{
 				value:    "1.447e+44",
-				expected: &decimal.Decimal{Decimal: dec.NewFromBigInt(big.NewInt(1447), 41)},
+				expected: decimal.Decimal{Decimal: dec.NewFromBigInt(big.NewInt(1447), 41)},
 			},
 			{
 				value:    "1*5",
-				expected: &decimal.Decimal{Decimal: dec.NewFromBigInt(big.NewInt(15), -1)},
+				expected: decimal.Decimal{Decimal: dec.NewFromBigInt(big.NewInt(15), -1)},
 			},
 
 			// Error.
@@ -320,7 +320,7 @@ func TestMakeDatetimeToStringConverter(t *testing.T) {
 		parisLoc)
 	time3 := time.Date(2020, 9, 14, 12, 12, 12, 0, time.UTC)
 
-	cases := []convCase[*datetime.Datetime, string]{
+	cases := []convCase[datetime.Datetime, string]{
 		{
 			value:    getDatetimeWithValidate(t, time1),
 			expected: "2023-08-30T12:06:05.123456789+0400",
@@ -335,7 +335,7 @@ func TestMakeDatetimeToStringConverter(t *testing.T) {
 		},
 	}
 	converter := tupleconv.MakeDatetimeToStringConverter()
-	HelperTestConverter[*datetime.Datetime, string](t, converter, cases)
+	HelperTestConverter[datetime.Datetime, string](t, converter, cases)
 }
 
 func TestMakeIntervalToStringConverter(t *testing.T) {
