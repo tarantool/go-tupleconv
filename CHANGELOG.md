@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- `StringToMapConverter` and `StringToSliceConverter` parse "null" strings to strings.
+
+### Fixed
+
+- `GetAnyConverter`: don't parse any to slices and arrays. 
+
 ## [v1.0.0] - 2024-10-09
 
 The release updates `go-tarantool` connector from `v1` to `v2`.
