@@ -219,6 +219,8 @@ func (StringToDatetimeConverter) Convert(src string) (any, error) {
 	return datetime.MakeDatetime(tm)
 }
 
+var errFailToConvertStringToMap = errors.New("can't convert string to map")
+
 // StringToMapConverter is a converter from string to map.
 // Only `json` is supported now.
 type StringToMapConverter struct{}
@@ -235,8 +237,13 @@ func (StringToMapConverter) Convert(src string) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return result, nil
+	if _, ok := result.(map[string]any); ok {
+		return result, nil
+	}
+	return nil, errFailToConvertStringToMap
 }
+
+var errFailToConvertStringToSlice = errors.New("can't convert string to slice")
 
 // StringToSliceConverter is a converter from string to slice.
 // Only `json` is supported now.
@@ -254,7 +261,10 @@ func (StringToSliceConverter) Convert(src string) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return result, nil
+	if _, ok := result.([]any); ok {
+		return result, nil
+	}
+	return nil, errFailToConvertStringToSlice
 }
 
 // StringToBinaryConverter is a converter from string to binary.

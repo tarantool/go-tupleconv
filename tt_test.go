@@ -208,7 +208,7 @@ func TestStringToTTConvFactory(t *testing.T) {
 					},
 				},
 			},
-			{value: "null", expected: nil},
+			{value: "null", isErr: true},
 
 			// Nullable.
 			{value: "null", isNullable: true, expected: nil},
@@ -300,6 +300,21 @@ func TestStringToTTConvFactory(t *testing.T) {
 					Year: -11, Month: -1110, Nsec: 1, Adjust: 2,
 				},
 			},
+			{
+				value:    "[1, 2, 3, 4]",
+				expected: []any{float64(1), float64(2), float64(3), float64(4)}},
+			{
+				value: `{"1": [1,2,3], "2": {"a":4} }`,
+				expected: map[string]any{
+					"1": []any{float64(1), float64(2), float64(3)},
+					"2": map[string]any{
+						"a": float64(4),
+					},
+				},
+			},
+			{value: "null", expected: "null"},
+			{value: "nil", expected: "nil"},
+			{value: "NULL", expected: "NULL"},
 		},
 		tupleconv.TypeScalar: {
 			{value: "1`e2", expected: 100.0},

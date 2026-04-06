@@ -179,6 +179,8 @@ func (fac StringToTTConvFactory) GetAnyConverter() Converter[string, any] {
 		fac.GetDatetimeConverter(),
 		fac.GetUUIDConverter(),
 		fac.GetIntervalConverter(),
+		fac.GetArrayConverter(),
+		fac.GetMapConverter(),
 		fac.GetStringConverter(),
 	})
 }
