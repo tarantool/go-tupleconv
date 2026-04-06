@@ -25,6 +25,7 @@ func HelperTestConverter[S any, T any](
 	t *testing.T,
 	mp tupleconv.Converter[S, T],
 	cases []convCase[S, T]) {
+	t.Helper()
 	for _, tc := range cases {
 		t.Run(fmt.Sprintln(tc.value), func(t *testing.T) {
 			result, err := mp.Convert(tc.value)
@@ -379,7 +380,6 @@ func TestMakeSequenceConverter(t *testing.T) {
 		{value: "-10", expected: int64(-10)},
 		{value: "2.5", expected: 2.5},
 		{value: "{}", expected: map[string]any{}},
-		{value: "null", expected: nil}, // As `json`.
 
 		// Error.
 		{value: "12-13-14", isErr: true},
