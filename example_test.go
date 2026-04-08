@@ -203,7 +203,7 @@ func upTarantool() (func(), error) {
 	})
 	if err != nil {
 		test_helpers.StopTarantoolWithCleanup(inst)
-		return nil, nil
+		return nil, err
 	}
 
 	cleanup := func() {
@@ -235,7 +235,11 @@ func ExampleMap_insertMappedTuples() {
 	}
 	defer cleanupTarantool()
 
-	conn, _ := tarantool.Connect(context.Background(), dialer, opts)
+	conn, err := tarantool.Connect(context.Background(), dialer, opts)
+	if err != nil {
+		fmt.Printf("can't connect to tarantool: %v\n", err)
+		return
+	}
 	defer conn.Close()
 
 	var spaceFmtResp [][]tupleconv.SpaceField
@@ -313,7 +317,11 @@ func Example_ttEncoder() {
 	tupleEncoder := tupleconv.MakeMapper([]tupleconv.Converter[any, string]{}).
 		WithDefaultConverter(converter)
 
-	conn, _ := tarantool.Connect(context.Background(), dialer, opts)
+	conn, err := tarantool.Connect(context.Background(), dialer, opts)
+	if err != nil {
+		fmt.Printf("can't connect to tarantool: %v\n", err)
+		return
+	}
 	defer conn.Close()
 
 	req := tarantool.NewSelectRequest("finances")
