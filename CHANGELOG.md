@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Fixed
+
+## [v1.1.0] - 2026-04-14
+
+The release allows to parse `any` to slices and arrays. 
+
 ### Changed
 
 - `StringToMapConverter` and `StringToSliceConverter` parse "null" strings to strings.
