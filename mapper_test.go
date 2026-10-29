@@ -160,3 +160,47 @@ func TestMapper_partialMapper(t *testing.T) {
 		})
 	}
 }
+
+func TestMapper_nilDefaultConverter(t *testing.T) {
+	converters := []tupleconv.Converter[string, any]{
+		tupleconv.MakeFuncConverter(func(s string) (any, error) {
+			return s, nil
+		}),
+	}
+	stringer := tupleconv.MakeFuncConverter(func(s string) (any, error) {
+		return s, nil
+	})
+
+	mappers := map[string]tupleconv.Mapper[string, any]{
+		"set nil": tupleconv.MakeMapper(converters).WithDefaultConverter(nil),
+		"unset": tupleconv.MakeMapper(converters).WithDefaultConverter(stringer).
+			WithDefaultConverter(nil),
+	}
+
+	for name, mapper := range mappers {
+		t.Run(name, func(t *testing.T) {
+			actualTuple, err := mapper.Map([]string{"1"})
+			assert.NoError(t, err)
+			assert.Equal(t, []any{"1"}, actualTuple)
+
+			_, err = mapper.Map([]string{"1", "2"})
+			assert.Error(t, err)
+		})
+	}
+}
+
+func TestMapper_nilConverter(t *testing.T) {
+	mapper := tupleconv.MakeMapper([]tupleconv.Converter[string, any]{
+		tupleconv.MakeFuncConverter(func(s string) (any, error) {
+			return s, nil
+		}),
+		nil,
+	})
+
+	actualTuple, err := mapper.Map([]string{"1"})
+	assert.NoError(t, err)
+	assert.Equal(t, []any{"1"}, actualTuple)
+
+	_, err = mapper.Map([]string{"1", "2"})
+	assert.EqualError(t, err, "converter 1 is nil")
+}

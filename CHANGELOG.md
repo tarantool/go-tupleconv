@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+- `Mapper.Map` panicked on a tuple longer than the converters list, when the
+  default converter was set to nil. A nil default converter now means there
+  is no default converter.
+- `Mapper.Map` panicked on a nil converter in the converters list. It returns
+  an error now.
+
 ## [v1.1.0] - 2026-04-14
 
 The release allows to parse `any` to slices and arrays. 
