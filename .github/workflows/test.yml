@@ -12,15 +12,15 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
 
       - name: Setup tarantool
-        uses: tarantool/setup-tarantool@v2
+        uses: tarantool/setup-tarantool@v4
         with:
-          tarantool-version: 2.x-latest
+          tarantool-version: '2'
 
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v7
         with:
           go-version: '1.24'
 
