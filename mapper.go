@@ -7,7 +7,7 @@ import (
 // Mapper performs tuple mapping.
 type Mapper[S any, T any] struct {
 	converters       []Converter[S, T]
-	defaultConverter *Converter[S, T]
+	defaultConverter Converter[S, T]
 }
 
 // MakeMapper creates Mapper.
@@ -15,9 +15,9 @@ func MakeMapper[S any, T any](converters []Converter[S, T]) Mapper[S, T] {
 	return Mapper[S, T]{converters: converters}
 }
 
-// WithDefaultConverter sets defaultConverter.
+// WithDefaultConverter sets defaultConverter. A nil converter unsets it.
 func (mapper Mapper[S, T]) WithDefaultConverter(converter Converter[S, T]) Mapper[S, T] {
-	mapper.defaultConverter = &converter
+	mapper.defaultConverter = converter
 	return mapper
 }
 
@@ -38,11 +38,14 @@ func (mapper Mapper[S, T]) Map(tuple []S) ([]T, error) {
 	var err error
 	result := make([]T, len(tuple))
 	for i, field := range tuple {
+		converter := mapper.defaultConverter
 		if i < len(mapper.converters) {
-			result[i], err = mapper.converters[i].Convert(field)
-		} else {
-			result[i], err = (*mapper.defaultConverter).Convert(field)
+			converter = mapper.converters[i]
 		}
+		if converter == nil {
+			return nil, fmt.Errorf("converter %d is nil", i)
+		}
+		result[i], err = converter.Convert(field)
 		if err != nil {
 			return nil, err
 		}
