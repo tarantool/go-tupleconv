@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/tarantool/go-tarantool/v2/datetime"
-	"github.com/tarantool/go-tarantool/v2/decimal"
+	"github.com/tarantool/go-tarantool/v3/datetime"
+	"github.com/tarantool/go-tarantool/v3/decimal"
 )
 
 // Converter is a converter from S to T.
@@ -164,7 +164,7 @@ func MakeStringToDecimalConverter(ignoreChars, decSeparators string) StringToDec
 func (conv StringToDecimalConverter) Convert(src string) (any, error) {
 	src = replaceCharacters(src, conv.ignoreChars, "")
 	src = replaceCharacters(src, conv.decSeparators, ".")
-	return decimal.MakeDecimalFromString(src)
+	return decimal.NewDecimalFromString(src)
 }
 
 // StringToUUIDConverter is a converter from string to UUID.
@@ -206,7 +206,7 @@ func (StringToDatetimeConverter) Convert(src string) (any, error) {
 		}
 		_, offset := tm.Zone()
 		tm = tm.In(time.FixedZone(datetime.NoTimezone, offset))
-		return datetime.MakeDatetime(tm)
+		return datetime.NewDatetime(tm)
 	}
 	loc, err := time.LoadLocation(tzName)
 	if err != nil {
@@ -216,7 +216,7 @@ func (StringToDatetimeConverter) Convert(src string) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return datetime.MakeDatetime(tm)
+	return datetime.NewDatetime(tm)
 }
 
 var errFailToConvertStringToMap = errors.New("can't convert string to map")

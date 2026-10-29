@@ -10,9 +10,9 @@ import (
 	dec "github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tarantool/go-tarantool/v2/datetime"
-	"github.com/tarantool/go-tarantool/v2/decimal"
-	"github.com/tarantool/go-tupleconv"
+	"github.com/tarantool/go-tarantool/v3/datetime"
+	"github.com/tarantool/go-tarantool/v3/decimal"
+	"github.com/tarantool/go-tupleconv/v2"
 )
 
 type convCase[S any, T any] struct {
@@ -40,7 +40,7 @@ func HelperTestConverter[S any, T any](
 }
 
 func getDatetimeWithValidate(t *testing.T, tm time.Time) datetime.Datetime {
-	dt, err := datetime.MakeDatetime(tm)
+	dt, err := datetime.NewDatetime(tm)
 	require.NoError(t, err)
 	return dt
 }
