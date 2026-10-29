@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+### Fixed
+
+## [v2.0.0] - 2026-10-29
+
+The release updates the module to v2 and the `go-tarantool` connector to v3.
+
+### Changed
+
 - Bump `go-tarantool` dependency to `v3`: the converters produce and accept
   the `datetime`, `decimal` and `uuid` types of `go-tarantool/v3`.
 - The module path is `github.com/tarantool/go-tupleconv/v2`.
