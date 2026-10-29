@@ -5,6 +5,7 @@
 [![Code Coverage][coverage-badge]][coverage-url]
 
 ## Table of contents
+* [Installation](#installation)
 * [Documentation](#documentation)
   * [Converter](#converter)
   * [Mapper](#mapper)
@@ -13,6 +14,18 @@
     * [String to nullable](#string-to-nullable)
     * [String to any/scalar](#string-to-anyscalar)
     * [Customization](#customization)
+
+## Installation
+
+```shell
+go get github.com/tarantool/go-tupleconv/v2
+```
+
+The module requires Go 1.24 or newer and produces the types of
+[go-tarantool v3](https://github.com/tarantool/go-tarantool) (`datetime`,
+`decimal`, `uuid`). Use `github.com/tarantool/go-tupleconv` v1 with
+go-tarantool v2.
+
 ## Documentation
 
 ### Converter
@@ -168,8 +181,8 @@ func example() {
 }
 ```
 
-[godoc-badge]: https://pkg.go.dev/badge/github.com/tarantool/go-tupleconv.svg
-[godoc-url]: https://pkg.go.dev/github.com/tarantool/go-tupleconv
+[godoc-badge]: https://pkg.go.dev/badge/github.com/tarantool/go-tupleconv/v2.svg
+[godoc-url]: https://pkg.go.dev/github.com/tarantool/go-tupleconv/v2
 [actions-badge]: https://github.com/tarantool/go-tupleconv/actions/workflows/test.yml/badge.svg
 [actions-url]: https://github.com/tarantool/go-tupleconv/actions/workflows/test.yml
 [coverage-badge]: https://coveralls.io/repos/github/tarantool/go-tupleconv/badge.svg?branch=master

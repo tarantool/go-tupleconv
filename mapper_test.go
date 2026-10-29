@@ -3,7 +3,7 @@ package tupleconv_test
 import (
 	"errors"
 	"fmt"
-	"github.com/tarantool/go-tupleconv"
+	"github.com/tarantool/go-tupleconv/v2"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

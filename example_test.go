@@ -8,12 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tarantool/go-tarantool/v2"
-	"github.com/tarantool/go-tarantool/v2/datetime"
-	"github.com/tarantool/go-tarantool/v2/test_helpers"
-	"github.com/tarantool/go-tupleconv"
+	"github.com/tarantool/go-tarantool/v3"
+	"github.com/tarantool/go-tarantool/v3/datetime"
+	"github.com/tarantool/go-tarantool/v3/test_helpers"
+	"github.com/tarantool/go-tupleconv/v2"
 
-	_ "github.com/tarantool/go-tarantool/v2/uuid"
+	_ "github.com/tarantool/go-tarantool/v3/uuid"
 )
 
 type filterIntConverter struct {
@@ -179,7 +179,6 @@ func ExampleTTConvFactory_custom() {
 	// 12 <nil>
 }
 
-const workDir = "work_dir"
 const server = "127.0.0.1:3014"
 
 var dialer = tarantool.NetDialer{
@@ -196,13 +195,13 @@ func upTarantool() (func(), error) {
 		Dialer:       dialer,
 		InitScript:   "testdata/config.lua",
 		Listen:       server,
-		WorkDir:      workDir,
 		WaitStart:    100 * time.Millisecond,
 		ConnectRetry: 3,
 		RetryTimeout: 500 * time.Millisecond,
 	})
 	if err != nil {
-		test_helpers.StopTarantoolWithCleanup(inst)
+		// StartTarantool stops the instance it failed to start and returns
+		// none.
 		return nil, err
 	}
 
